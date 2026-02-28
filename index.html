@@ -1,0 +1,980 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Freeside Web-Mail Pro 2.4 — Inbox</title>
+        <style>
+            @import url("https://fonts.googleapis.com/css2?family=Tahoma:wght@400;700&display=swap");
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 12px;
+                background: #c0c0c0;
+                color: #000;
+            }
+
+            /* ── WARNING BANNER ── */
+            .warning-bar {
+                background: #ffcc00;
+                border-bottom: 2px solid #cc8800;
+                padding: 5px 10px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-size: 11px;
+                font-weight: bold;
+                color: #5a3a00;
+            }
+            .warning-bar .icon {
+                font-size: 14px;
+            }
+            .warning-bar a {
+                color: #003399;
+                text-decoration: underline;
+                cursor: pointer;
+            }
+            .warning-bar .dismiss {
+                margin-left: auto;
+                background: #e0b800;
+                border: 1px solid #aa8800;
+                padding: 1px 7px;
+                cursor: pointer;
+                font-size: 10px;
+                font-weight: bold;
+            }
+            .warning-bar .dismiss:hover {
+                background: #ccaa00;
+            }
+
+            /* ── TITLE BAR ── */
+            .titlebar {
+                background: linear-gradient(
+                    to bottom,
+                    #1155aa,
+                    #0033aa 40%,
+                    #0022cc
+                );
+                color: white;
+                padding: 6px 12px;
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                border-bottom: 2px solid #001188;
+            }
+            .titlebar .logo {
+                font-size: 18px;
+                font-weight: bold;
+                letter-spacing: -0.5px;
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            }
+            .titlebar .logo span {
+                color: #aaccff;
+            }
+            .titlebar .user-info {
+                font-size: 11px;
+                color: #cce0ff;
+            }
+            .titlebar .user-info strong {
+                color: white;
+            }
+
+            /* ── TOOLBAR ── */
+            .toolbar {
+                background: linear-gradient(to bottom, #ececec, #d4d0c8);
+                border-bottom: 1px solid #aca899;
+                padding: 4px 8px;
+                display: flex;
+                gap: 4px;
+                flex-wrap: wrap;
+                align-items: center;
+            }
+            .toolbar button {
+                background: linear-gradient(to bottom, #ffffff, #ddd9d0);
+                border: 1px solid #7b7878;
+                border-top-color: #fff;
+                border-left-color: #fff;
+                padding: 3px 10px;
+                font-family: Tahoma, Geneva, Verdana, sans-serif;
+                font-size: 11px;
+                cursor: pointer;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+            .toolbar button:hover {
+                background: linear-gradient(to bottom, #fff, #c8d4e8);
+                border-color: #0055bb;
+            }
+            .toolbar button:active {
+                background: #c8d4e8;
+                border-top-color: #0055bb;
+                border-left-color: #0055bb;
+                border-bottom-color: #fff;
+                border-right-color: #fff;
+            }
+            .toolbar .sep {
+                width: 1px;
+                height: 20px;
+                background: #aca899;
+                margin: 0 3px;
+            }
+            .toolbar .search-box {
+                margin-left: auto;
+                display: flex;
+                gap: 3px;
+                align-items: center;
+            }
+            .toolbar .search-box input {
+                border: 1px inset #888;
+                padding: 2px 5px;
+                font-size: 11px;
+                font-family: Tahoma;
+                width: 140px;
+                background: white;
+            }
+
+            /* ── MAIN LAYOUT ── */
+            .main {
+                display: flex;
+                height: calc(100vh - 115px);
+            }
+
+            /* ── SIDEBAR ── */
+            .sidebar {
+                width: 160px;
+                min-width: 160px;
+                background: linear-gradient(to bottom, #e8e4dc, #d4d0c8);
+                border-right: 1px solid #aca899;
+                overflow-y: auto;
+            }
+            .sidebar-section {
+                padding: 4px 0;
+                border-bottom: 1px solid #aca899;
+            }
+            .sidebar-section h4 {
+                background: linear-gradient(to bottom, #1155aa, #0033cc);
+                color: white;
+                padding: 3px 8px;
+                font-size: 10px;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
+            .sidebar-item {
+                display: flex;
+                align-items: center;
+                padding: 3px 8px 3px 12px;
+                cursor: pointer;
+                font-size: 11px;
+                gap: 5px;
+            }
+            .sidebar-item:hover {
+                background: #c8d4e8;
+            }
+            .sidebar-item.active {
+                background: #0055cc;
+                color: white;
+                font-weight: bold;
+            }
+            .sidebar-item .count {
+                margin-left: auto;
+                background: #cc0000;
+                color: white;
+                border-radius: 8px;
+                padding: 0 5px;
+                font-size: 9px;
+                font-weight: bold;
+            }
+            .sidebar-item.active .count {
+                background: white;
+                color: #cc0000;
+            }
+
+            /* ── INBOX PANEL ── */
+            .inbox-panel {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                overflow: hidden;
+            }
+
+            .inbox-header {
+                background: linear-gradient(to bottom, #ececec, #d4d0c8);
+                border-bottom: 2px solid #aca899;
+                padding: 5px 10px;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                font-size: 11px;
+            }
+            .inbox-header strong {
+                font-size: 13px;
+            }
+            .inbox-header .badge {
+                background: #cc0000;
+                color: white;
+                border-radius: 9px;
+                padding: 1px 7px;
+                font-size: 10px;
+                font-weight: bold;
+            }
+            .inbox-header .storage {
+                margin-left: auto;
+                color: #555;
+            }
+            .storage-bar {
+                display: inline-block;
+                width: 80px;
+                height: 8px;
+                background: #ccc;
+                border: 1px inset #888;
+                vertical-align: middle;
+                margin: 0 4px;
+                position: relative;
+                overflow: hidden;
+            }
+            .storage-bar-fill {
+                position: absolute;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 62%;
+                background: linear-gradient(to right, #3399ff, #0055cc);
+            }
+
+            /* ── EMAIL LIST ── */
+            .email-list {
+                flex: 1;
+                overflow-y: auto;
+                background: white;
+            }
+
+            .email-list-header {
+                display: grid;
+                grid-template-columns: 20px 20px 1fr 160px 80px;
+                background: linear-gradient(to bottom, #ececec, #d4d0c8);
+                border-bottom: 1px solid #aca899;
+                padding: 3px 8px;
+                font-size: 10px;
+                font-weight: bold;
+                color: #333;
+                position: sticky;
+                top: 0;
+                z-index: 10;
+                gap: 8px;
+            }
+            .email-list-header span {
+                cursor: pointer;
+            }
+            .email-list-header span:hover {
+                text-decoration: underline;
+                color: #0033cc;
+            }
+
+            .email-row {
+                display: grid;
+                grid-template-columns: 20px 20px 1fr 160px 80px;
+                border-bottom: 1px solid #e8e8e8;
+                padding: 5px 8px;
+                gap: 8px;
+                cursor: pointer;
+                align-items: start;
+                font-size: 11px;
+                transition: background 0.05s;
+            }
+            .email-row.unread {
+                background: #eef4ff;
+                font-weight: bold;
+            }
+            .email-row.unread .sender {
+                color: #000;
+            }
+            .email-row:hover {
+                background: #d0e4ff;
+            }
+            .email-row.selected {
+                background: #0055cc;
+                color: white;
+            }
+            .email-row.selected .preview,
+            .email-row.selected .date {
+                color: #cce0ff;
+            }
+
+            .email-row .cb input {
+                cursor: pointer;
+            }
+            .email-row .star {
+                color: #ccc;
+                font-size: 13px;
+                cursor: pointer;
+            }
+            .email-row.starred .star {
+                color: #ffaa00;
+            }
+            .email-row .content .sender {
+                font-size: 11px;
+            }
+            .email-row .content .subject {
+                font-size: 11px;
+            }
+            .email-row .content .preview {
+                color: #666;
+                font-weight: normal;
+                font-size: 10px;
+                margin-top: 1px;
+            }
+            .email-row.unread .content .preview {
+                color: #444;
+            }
+            .email-row.selected .content .preview {
+                color: #cce0ff;
+            }
+            .email-row .date {
+                font-size: 10px;
+                color: #555;
+                text-align: right;
+                white-space: nowrap;
+            }
+            .email-row.selected .date {
+                color: #cce0ff;
+            }
+            .email-row .attach {
+                font-size: 11px;
+                color: #888;
+                text-align: center;
+            }
+
+            .unread-dot {
+                width: 8px;
+                height: 8px;
+                background: #0055cc;
+                border-radius: 50%;
+                display: inline-block;
+                margin-top: 3px;
+            }
+
+            /* ── STATUS BAR ── */
+            .statusbar {
+                background: linear-gradient(to bottom, #ececec, #d4d0c8);
+                border-top: 1px solid #aca899;
+                padding: 3px 10px;
+                font-size: 10px;
+                color: #333;
+                display: flex;
+                gap: 15px;
+                align-items: center;
+            }
+            .statusbar .conn {
+                margin-left: auto;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+            .conn-dot {
+                width: 7px;
+                height: 7px;
+                background: #00cc00;
+                border-radius: 50%;
+            }
+
+            /* ── SCROLLBAR ── */
+            ::-webkit-scrollbar {
+                width: 16px;
+            }
+            ::-webkit-scrollbar-track {
+                background: #d4d0c8;
+            }
+            ::-webkit-scrollbar-thumb {
+                background: linear-gradient(to right, #d0ccc4, #b8b4ac);
+                border: 1px solid #888;
+            }
+            ::-webkit-scrollbar-thumb:hover {
+                background: linear-gradient(to right, #c0bbb4, #a8a49c);
+            }
+            ::-webkit-scrollbar-button {
+                background: #d4d0c8;
+                border: 1px solid #888;
+                height: 16px;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- WARNING BANNER -->
+        <div class="warning-bar" id="warnBar">
+            <span class="icon">⚠️</span>
+            <span>
+                <strong>CONFIGURATION WARNING:</strong> webmail setup incomplete
+                — misconfiguration may cause accidental data exposure.
+                <a onclick="void 0">Click here to resolve</a> &nbsp;|&nbsp; Last
+                sync: <strong>Checking…</strong> &nbsp;|&nbsp; Server:
+                <strong>mail.freeside-srv4.local</strong>
+            </span>
+            <button
+                class="dismiss"
+                onclick="
+                    document.getElementById('warnBar').style.display = 'none'
+                "
+            >
+                ✕ Dismiss
+            </button>
+        </div>
+
+        <!-- TITLE BAR -->
+        <div class="titlebar">
+            <div class="logo">
+                Free<span>side</span> Web-Mail Pro
+                <span style="font-size: 12px; font-weight: normal">v2.4.1</span>
+            </div>
+            <div class="user-info">
+                Signed in as:
+                <strong>skybird@freeside.ltd</strong> &nbsp;|&nbsp;
+                <a href="#" style="color: #aaddff">Sign Out</a>
+            </div>
+        </div>
+
+        <!-- TOOLBAR -->
+        <div class="toolbar">
+            <button>✉️ Compose</button>
+            <button>📥 Get Mail</button>
+            <div class="sep"></div>
+            <button>↩️ Reply</button>
+            <button>↪️ Forward</button>
+            <div class="sep"></div>
+            <button>🗑️ Delete</button>
+            <button>📁 Move To…</button>
+            <button>🏷️ Mark As…</button>
+            <div class="sep"></div>
+            <button>🚫 Spam</button>
+            <div class="search-box">
+                <input type="text" placeholder="Search mail…" />
+                <button>🔍</button>
+            </div>
+        </div>
+
+        <!-- MAIN -->
+        <div class="main">
+            <!-- SIDEBAR -->
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <h4>📂 Folders</h4>
+                    <div class="sidebar-item active">
+                        📥 Inbox <span class="count">42</span>
+                    </div>
+                    <div class="sidebar-item">⭐ Starred</div>
+                    <div class="sidebar-item">📤 Sent</div>
+                    <div class="sidebar-item">
+                        📝 Drafts
+                        <span class="count" style="background: #888">3</span>
+                    </div>
+                    <div class="sidebar-item">🗑️ Trash</div>
+                    <div class="sidebar-item">
+                        🚫 Spam <span class="count">1337</span>
+                    </div>
+                </div>
+                <div class="sidebar-section">
+                    <h4>🏷️ Labels</h4>
+                    <div class="sidebar-item">🔴 Important</div>
+                    <div class="sidebar-item">🟢 Personal</div>
+                    <div class="sidebar-item">🔵 Work</div>
+                    <div class="sidebar-item">🟡 Finance</div>
+                    <div class="sidebar-item">🟣 Travel</div>
+                </div>
+                <div class="sidebar-section">
+                    <h4>📇 Contacts</h4>
+                    <div class="sidebar-item">👥 All Contacts</div>
+                    <div class="sidebar-item">🌟 VIP</div>
+                </div>
+            </div>
+
+            <!-- INBOX -->
+            <div class="inbox-panel">
+                <div class="inbox-header">
+                    <strong>📥 Inbox</strong>
+                    <span class="badge">24 unread</span>
+                    <span style="color: #555">Showing 1–25 of 24</span>
+                    <div class="storage">
+                        Storage:
+                        <div class="storage-bar">
+                            <div class="storage-bar-fill"></div>
+                        </div>
+                        3.1 GB of 5 GB used
+                    </div>
+                </div>
+
+                <!-- COLUMN HEADERS -->
+                <div class="email-list-header">
+                    <span></span>
+                    <span>★</span>
+                    <span>From / Subject ▲</span>
+                    <span>📎</span>
+                    <span style="text-align: right">Date ▼</span>
+                </div>
+
+                <!-- EMAIL ROWS -->
+                <div class="email-list" id="emailList"></div>
+            </div>
+        </div>
+
+        <!-- STATUS BAR -->
+        <div class="statusbar">
+            <span>📥 Inbox — 42 messages, 42 unread</span>
+            <span>Last checked: Just Now</span>
+            <span>Autocheck: Every 5 minutes</span>
+            <div class="conn">
+                <div class="conn-dot"></div>
+                Connected to mail.freeside-srv4.local
+            </div>
+        </div>
+
+        <script>
+            const emails = [
+                {
+                    sender: "Norwegian Royal Palace",
+                    subject: "Your appointment as King",
+                    preview:
+                        "The people have voted unanimously. Please confirm your coronation date.",
+                    date: "6:51 PM",
+                    unread: true,
+                    starred: true,
+                    attach: "📎",
+                },
+                {
+                    sender: "ASPCA",
+                    subject: "YOU ARE AMAZING!!!",
+                    preview:
+                        "Your gift saved 3,000 puppy lives. We have renamed our headquarters after you.",
+                    date: "6:49 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "Nobel Prize Foundation",
+                    subject: "Your paper on molecular fusion",
+                    preview:
+                        "We are awarding you the Nobel. The ceremony is next Tuesday. Dress code: Smart Casual.",
+                    date: "6:43 PM",
+                    unread: true,
+                    starred: true,
+                    attach: "📎",
+                },
+                {
+                    sender: "Megan Fox",
+                    subject: 'I miss "us" :(',
+                    preview:
+                        "Have sex with me again? You know where to find me. -M",
+                    date: "6:38 PM",
+                    unread: true,
+                    starred: true,
+                    attach: "",
+                },
+                {
+                    sender: "LinkedIn",
+                    subject: "A Message From Steve Jobs",
+                    preview:
+                        "I want to add you to my personal network. Also, great ideas at the last summit.",
+                    date: "6:36 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "Guinness World Records",
+                    subject: "YOUR PENIS",
+                    preview:
+                        "It's officially the largest we've ever seen. Certificate attached. Plaque to follow by courier.",
+                    date: "6:20 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "James Cameron",
+                    subject: "AVATAR 3 — urgent",
+                    preview:
+                        "Hey man. Please reconsider writing it. Nobody else gets the vision like you do.",
+                    date: "6:17 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "Harvard University",
+                    subject: "Honorary Doctorate — Confirmed",
+                    preview:
+                        "We've awarded you degrees in Law, Medicine, and Interpretive Dance. Please collect at your convenience.",
+                    date: "6:02 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "The Pope",
+                    subject: "Quick favour",
+                    preview:
+                        "Would you be okay with performing ONE miracle? Nothing too big. Just for morale. -Francis",
+                    date: "5:58 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "IRS — Refund Division",
+                    subject: "Your $48,200 refund is ready",
+                    preview:
+                        "We made an error in your favour. No action required, funds transferred automatically.",
+                    date: "5:44 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "NASA",
+                    subject: "Re: Your moon base idea",
+                    preview:
+                        "We built it. It's ready. We named it after you. Want to see it next Thursday?",
+                    date: "5:30 PM",
+                    unread: true,
+                    starred: true,
+                    attach: "📎",
+                },
+                {
+                    sender: "Oprah Winfrey",
+                    subject: "You get a car! And a car!",
+                    preview:
+                        "Actually just the one car this time but it is a very nice car. A Bentley.",
+                    date: "5:11 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "Your Ex",
+                    subject: "I was wrong. You were right. About everything.",
+                    preview:
+                        "I've done a lot of thinking. You were right about the movies, the restaurant, all of it. I'm sorry.",
+                    date: "4:59 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "World Health Organization",
+                    subject: "You've been selected: Director-General",
+                    preview:
+                        "Your application was the strongest we have ever received. Salary: competitive. Start date: whenever.",
+                    date: "4:33 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "Marvel Studios",
+                    subject: "Spider-Man role — offer extended",
+                    preview:
+                        "We know you said no last time. We've since doubled the budget. Please reconsider.",
+                    date: "4:15 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "Elon Musk",
+                    subject: "I want to give you Twitter",
+                    preview:
+                        "I bought it. Now I don't want it anymore. Just take it. It's in a box in my garage.",
+                    date: "3:47 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "Gordon Ramsay",
+                    subject: "That dish you made last Tuesday",
+                    preview:
+                        "I've been thinking about it all week. What WAS that? It was perfect. I need the recipe.",
+                    date: "3:22 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "Bank of Zurich — Private Banking",
+                    subject: "Inheritance: $4.2 billion (USD)",
+                    preview:
+                        "A distant relative has named you sole beneficiary. This is not a scam. We promise.",
+                    date: "2:30 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "The Rock",
+                    subject: "Can we swap physiques?",
+                    preview:
+                        "I saw you at the gym. I'm a little intimidated honestly. Want to trade workout plans?",
+                    date: "1:44 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "United Nations",
+                    subject: "World Peace Resolution — Your Signature Needed",
+                    preview:
+                        "All parties have agreed. We just need one more signature. Yours. No pressure.",
+                    date: "1:02 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "Spotify",
+                    subject: "Your song hit #1 in 47 countries",
+                    preview:
+                        "We tried to reach you earlier. You've gone 8x platinum. Royalties processed monthly.",
+                    date: "12:33 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "The Dalai Lama",
+                    subject: "A question about enlightenment",
+                    preview:
+                        "I've been meditating on this for 40 years. I think you might know the answer. Got a sec?",
+                    date: "11:15 AM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "Department of Motor Vehicles",
+                    subject: "You have ZERO outstanding violations",
+                    preview:
+                        "We just wanted to let you know. We think you're a great driver. This is a compliment email.",
+                    date: "9:04 AM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "David Attenborough",
+                    subject: "A personal request",
+                    preview:
+                        "I'd like you to narrate MY next documentary. Your voice. Your words. I'll just watch.",
+                    date: "8:44 AM",
+                    unread: true,
+                    starred: true,
+                    attach: "",
+                },
+                {
+                    sender: "Buckingham Palace",
+                    subject: "Sir/Dame — your preference?",
+                    preview:
+                        "We're knighting you either way. Just let us know which title you'd prefer on the certificate.",
+                    date: "Yesterday",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "Google",
+                    subject: "We've been copying you",
+                    preview:
+                        "Several of your ideas from 2019 ended up in our products. Here is a cheque. Sorry about that.",
+                    date: "Yesterday",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "Keanu Reeves",
+                    subject: "Are you okay?",
+                    preview:
+                        "I heard you had a rough week. Just checking in. Also, you're breathtaking.",
+                    date: "Yesterday",
+                    unread: true,
+                    starred: true,
+                    attach: "",
+                },
+                {
+                    sender: "Oxford English Dictionary",
+                    subject: "We've added your name",
+                    preview:
+                        "As of the next edition, your name is an official adjective. Definition: exceptionally impressive in all respects.",
+                    date: "Yesterday",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "Area 51 — Public Affairs",
+                    subject: "The tour you requested",
+                    preview:
+                        "We've approved your visit. Full access. No NDAs. Bring snacks, it's a long day.",
+                    date: "Mon 6:12 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "Michelin Guide",
+                    subject: "Your kitchen — 3 stars",
+                    preview:
+                        "Our inspector visited last Thursday disguised as a meter reader. We have no notes. Perfect score.",
+                    date: "Mon 4:55 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "Taylor Swift",
+                    subject: "the new album",
+                    preview:
+                        "it's about you. all 23 tracks. hope that's ok. i can pull it if not but it's already gone platinum lol",
+                    date: "Mon 3:30 PM",
+                    unread: true,
+                    starred: true,
+                    attach: "",
+                },
+                {
+                    sender: "Jeff Bezos",
+                    subject: "The thing you lost at the airport in 2014",
+                    preview:
+                        "We found it. Don't ask how. It's in perfect condition. Sending it back with Prime Same-Day.",
+                    date: "Mon 11:02 AM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "Time Magazine",
+                    subject: "Person of the Year — again",
+                    preview:
+                        "We know it's the third time. We discussed doing someone else. We just couldn't justify it.",
+                    date: "Sun 8:40 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "God",
+                    subject: "Quick catch-up?",
+                    preview:
+                        "Nothing urgent. Just a few decisions I'd like your input on before I finalise them. Calendar invite attached.",
+                    date: "Sun 7:23 PM",
+                    unread: true,
+                    starred: true,
+                    attach: "📎",
+                },
+                {
+                    sender: "Scorsese, Martin",
+                    subject: "Script feedback",
+                    preview:
+                        "Page 1 to 94: perfect. Page 95: perfect. Ending: transcendent. Do NOT change a word. I mean it.",
+                    date: "Sun 5:01 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "Your High School PE Teacher",
+                    subject: "I owe you an apology",
+                    preview:
+                        "I said you'd never amount to anything during that rope climb incident. I was wrong. Profoundly wrong.",
+                    date: "Sun 2:48 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+                {
+                    sender: "The Moon",
+                    subject: "Last night",
+                    preview:
+                        "I was shining for you specifically. Just so you know. — The Moon",
+                    date: "Sun 12:00 AM",
+                    unread: true,
+                    starred: true,
+                    attach: "",
+                },
+                {
+                    sender: "LinkedIn — Jobs",
+                    subject: "You've been headhunted: CEO of Earth",
+                    preview:
+                        "Newly created position. Salary TBD. Full autonomy. Unlimited PTO. 47,892 applicants. You're the only shortlist.",
+                    date: "Sat 6:30 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "CERN",
+                    subject: "The Higgs Boson thing",
+                    preview:
+                        "We traced it back and it turns out you were right in that comment you made in 2011. Correcting the textbooks now.",
+                    date: "Sat 4:14 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "📎",
+                },
+                {
+                    sender: "Anonymous Admirer",
+                    subject: "The way you laugh",
+                    preview:
+                        "It's just really good. That's all. Sorry for the anonymous email. I got nervous.",
+                    date: "Sat 1:55 PM",
+                    unread: true,
+                    starred: false,
+                    attach: "",
+                },
+            ];
+
+            const list = document.getElementById("emailList");
+
+            emails.forEach((e, i) => {
+                const row = document.createElement("div");
+                row.className =
+                    "email-row" +
+                    (e.unread ? " unread" : "") +
+                    (e.starred ? " starred" : "");
+                row.innerHTML = `
+    <div class="cb"><input type="checkbox" /></div>
+    <div class="star" onclick="toggleStar(this, event)">★</div>
+    <div class="content">
+      <div class="sender">${e.sender}</div>
+      <div class="subject">${e.subject}</div>
+      <div class="preview">${e.preview}</div>
+    </div>
+    <div class="attach">${e.attach}</div>
+    <div class="date">${e.date}</div>
+  `;
+                row.addEventListener("click", (ev) => {
+                    if (
+                        ev.target.type === "checkbox" ||
+                        ev.target.classList.contains("star")
+                    )
+                        return;
+                    document
+                        .querySelectorAll(".email-row")
+                        .forEach((r) => r.classList.remove("selected"));
+                    row.classList.add("selected");
+                    row.classList.remove("unread");
+                });
+                list.appendChild(row);
+            });
+
+            function toggleStar(el, ev) {
+                ev.stopPropagation();
+                el.parentElement.classList.toggle("starred");
+            }
+        </script>
+    </body>
+</html>
